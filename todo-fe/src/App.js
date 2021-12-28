@@ -1,39 +1,25 @@
 import { useState, useEffect } from "react";
 import TodoCard from "./TodoCard.js";
+import axios from "axios";
 import "./App.css";
 
 function App() {
-  const [todoData, setTodoData] = useState([
-    {
-      id: 1,
-      todo: "Workout",
-    },
-    {
-      id: 2,
-      todo: "Eat healthy",
-    },
-    {
-      id: 3,
-      todo: "Solve daily leetcode",
-    },
-    {
-      id: 4,
-      todo: "Work on project",
-    },
-  ]);
+  const [todoData, setTodoData] = useState([]);
   let [todoInput, setTodoInput] = useState("");
 
   function handleSubmit(event) {
     event.preventDefault();
 
-    console.log(todoInput);
-    setTodoData([
-      ...todoData,
-      {
-        id: 54,
-        todo: todoInput,
-      },
-    ]);
+    axios
+      .post("https://tl-be.herokuapp.com/todo/", { todo: todoInput })
+      .then((response) => {
+        console.log(response);
+
+        setTodoData([...todoData, response.data]);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
 
     setTodoInput("");
   }
@@ -43,8 +29,27 @@ function App() {
   }
 
   function removeTodo(id) {
-    setTodoData(todoData.filter((card) => card.id !== id));
+    axios
+      .delete(`https://tl-be.herokuapp.com/todo/${id}`)
+      .then((response) => {
+        setTodoData(todoData.filter((card) => card.id !== id));
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }
+
+  useEffect(() => {
+    console.log("fetch");
+    axios
+      .get("https://tl-be.herokuapp.com/todo/")
+      .then((response) => {
+        setTodoData(response.data);
+      })
+      .catch((error) => {
+        console.log("error", error);
+      });
+  }, []);
 
   return (
     <div className="App">
